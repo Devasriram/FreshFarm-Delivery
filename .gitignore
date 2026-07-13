@@ -1,0 +1,17 @@
+# Frontend
+village-farm-app/node_modules/
+village-farm-app/dist/
+
+# Backend
+farm-fresh-backend/venv/
+farm-fresh-backend/__pycache__/
+farm-fresh-backend/.env
+
+# Python
+*.pyc
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
