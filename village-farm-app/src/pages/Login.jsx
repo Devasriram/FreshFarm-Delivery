@@ -41,16 +41,16 @@ function Login() {
     }
 
     try {
-      setLoading(true);
+  setLoading(true);
 
-      const response = await loginCustomer(formData);
+  const response = await loginCustomer(formData);
 
-      login(
-        response.data.access_token,
-        response.data.customer
-      );
+  login(
+    response.data.access_token,
+    response.data.customer
+  );
 
-      navigate("/customer/dashboard");
+  navigate("/home");
     } catch (err) {
       setError(
         err.response?.data?.detail ||

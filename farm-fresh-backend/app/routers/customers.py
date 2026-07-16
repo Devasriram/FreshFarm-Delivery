@@ -128,3 +128,4 @@ def customer_profile(
     ),
 ):
     return current_customer
+
