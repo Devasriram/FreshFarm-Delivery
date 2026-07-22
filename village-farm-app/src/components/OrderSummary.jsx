@@ -1,9 +1,9 @@
-import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 
-function OrderSummary() {
-  const navigate = useNavigate();
-
+function OrderSummary({
+  handlePlaceOrder,
+  placingOrder,
+}) {
   const {
     cart,
     totalItems,
@@ -37,8 +37,8 @@ function OrderSummary() {
           >
 
             <img
-              src={`/images/products/${item.product_image}`}
-              alt={item.product_name}
+              src={`/images/products/${item.product.product_image}`}
+              alt={item.product.product_name}
               className="w-16 h-16 rounded-lg object-cover"
               onError={(e) => {
                 e.target.src = "/images/no-image.png";
@@ -48,7 +48,7 @@ function OrderSummary() {
             <div className="flex-1">
 
               <h3 className="font-semibold">
-                {item.product_name}
+                {item.product.product_name}
               </h3>
 
               <p className="text-sm text-gray-500">
@@ -58,7 +58,8 @@ function OrderSummary() {
             </div>
 
             <div className="font-bold text-green-700">
-              ₹{item.price * item.quantity}
+              ₹
+              {(item.product.price * item.quantity).toFixed(2)}
             </div>
 
           </div>
@@ -121,12 +122,13 @@ function OrderSummary() {
       </div>
 
       <button
-        onClick={() => {
-  navigate("/order-success");
-}}
-        className="w-full mt-8 bg-green-700 hover:bg-green-800 text-white py-4 rounded-xl text-lg font-semibold transition"
+        onClick={handlePlaceOrder}
+        disabled={placingOrder}
+        className="w-full mt-8 bg-green-700 hover:bg-green-800 disabled:bg-gray-400 text-white py-4 rounded-xl text-lg font-semibold transition"
       >
-        Place Order
+        {placingOrder
+          ? "Placing Order..."
+          : "Place Order"}
       </button>
 
     </div>

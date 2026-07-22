@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 
@@ -5,6 +6,22 @@ function ProductCard({ product }) {
   const navigate = useNavigate();
 
   const { addToCart } = useCart();
+
+  const [adding, setAdding] = useState(false);
+
+  const handleAddToCart = async () => {
+    try {
+      setAdding(true);
+
+      await addToCart(product);
+
+      alert("Product added to cart successfully.");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setAdding(false);
+    }
+  };
 
   return (
     <div className="bg-white rounded-2xl shadow-md hover:shadow-xl overflow-hidden transition duration-300">
@@ -21,7 +38,6 @@ function ProductCard({ product }) {
           }}
         />
 
-        {/* Stock Badge */}
         {product.stock > 0 ? (
           <span className="absolute top-3 right-3 bg-green-600 text-white text-sm font-semibold px-3 py-1 rounded-full">
             In Stock
@@ -65,15 +81,15 @@ function ProductCard({ product }) {
         <div className="flex gap-3 mt-5">
 
           <button
-            onClick={() => addToCart(product)}
-            disabled={product.stock <= 0}
+            onClick={handleAddToCart}
+            disabled={product.stock <= 0 || adding}
             className={`flex-1 py-3 rounded-xl font-semibold transition ${
               product.stock > 0
                 ? "bg-green-700 hover:bg-green-800 text-white"
                 : "bg-gray-300 text-gray-600 cursor-not-allowed"
             }`}
           >
-            Add to Cart
+            {adding ? "Adding..." : "Add to Cart"}
           </button>
 
           <button

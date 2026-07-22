@@ -1,4 +1,16 @@
 function HeroBanner() {
+
+  const handleShopNow = () => {
+    const section = document.getElementById("categories");
+
+    if (section) {
+      section.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  };
+
   return (
     <section className="max-w-7xl mx-auto px-6">
 
@@ -16,7 +28,10 @@ function HeroBanner() {
           Farm fresh products delivered directly to your doorstep.
         </p>
 
-        <button className="mt-8 bg-white text-green-700 font-bold px-8 py-3 rounded-xl hover:bg-gray-100">
+        <button
+          onClick={handleShopNow}
+          className="mt-8 bg-white text-green-700 font-bold px-8 py-3 rounded-xl hover:bg-gray-100 transition duration-300"
+        >
           Shop Now
         </button>
 

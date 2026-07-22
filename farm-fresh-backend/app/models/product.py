@@ -81,3 +81,18 @@ class Product(Base):
         back_populates="product",
         cascade="all, delete-orphan"
     )
+
+    freshness_info = Column(
+    String(255),
+    default="Freshly harvested today"
+    )
+
+    delivery_available = Column(
+    Boolean,
+    default=True
+    )
+
+    additional_images = Column(
+    Text,
+    nullable=True
+    )

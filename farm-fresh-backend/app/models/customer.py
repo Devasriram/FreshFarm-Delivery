@@ -2,6 +2,7 @@ from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import DateTime
+from sqlalchemy.sql import func
 
 from sqlalchemy.orm import relationship
 
@@ -48,12 +49,10 @@ class Customer(Base):
     )
 
     created_at = Column(
-        DateTime
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False
     )
-
-    # -----------------------------
-    # Relationships
-    # -----------------------------
 
     cart_items = relationship(
         "CartItem",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Header from "../components/Header";
@@ -16,6 +16,7 @@ function Checkout() {
   const {
     cart,
     clearCart,
+    loadCart,
   } = useCart();
 
   const [address, setAddress] = useState({
@@ -33,14 +34,39 @@ function Checkout() {
 
   const [paymentMethod, setPaymentMethod] = useState("cod");
 
-  if (cart.length === 0) {
-    navigate("/cart");
-    return null;
-  }
+  const [placingOrder, setPlacingOrder] = useState(false);
+
+  // Redirect only when user opens checkout with an empty cart
+  useEffect(() => {
+    if (
+      !placingOrder &&
+      cart.length === 0 &&
+      window.location.pathname === "/checkout"
+    ) {
+      navigate("/cart", { replace: true });
+    }
+  }, [cart, placingOrder, navigate]);
 
   const handlePlaceOrder = async () => {
     try {
-      const order = {
+      if (
+        !address.fullName ||
+        !address.mobile ||
+        !address.houseNo ||
+        !address.street ||
+        !address.village ||
+        !address.city ||
+        !address.district ||
+        !address.state ||
+        !address.pincode
+      ) {
+        alert("Please fill all required address fields.");
+        return;
+      }
+
+      setPlacingOrder(true);
+
+      const orderData = {
         full_name: address.fullName,
         mobile: address.mobile,
         email: address.email,
@@ -54,23 +80,42 @@ function Checkout() {
         pincode: address.pincode,
 
         payment_method: paymentMethod,
-
-        items: cart.map((item) => ({
-          product_id: item.id,
-          quantity: item.quantity,
-        })),
       };
 
-      const response = await placeOrder(order);
+      const response = await placeOrder(orderData);
 
-      clearCart();
+      console.log("Order Response:", response);
 
+      // Navigate first
       navigate("/order-success", {
-        state: response,
+        state: {
+          order: response,
+        },
+        replace: true,
       });
+
+      // Then clear backend cart
+      await clearCart();
+
+      await loadCart();
+
     } catch (err) {
+
       console.error(err);
-      alert("Unable to place order.");
+
+      console.log(err.response);
+
+      console.log(err.response?.data);
+
+      alert(
+        err.response?.data?.detail ||
+        "Unable to place order."
+      );
+
+    } finally {
+
+      setPlacingOrder(false);
+
     }
   };
 
@@ -105,6 +150,7 @@ function Checkout() {
 
             <OrderSummary
               handlePlaceOrder={handlePlaceOrder}
+              placingOrder={placingOrder}
             />
 
           </div>

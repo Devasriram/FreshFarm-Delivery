@@ -115,6 +115,46 @@ def search_products(
 
 
 # -------------------------------
+# Get Related Products
+# -------------------------------
+@router.get(
+    "/{product_id}/related",
+    response_model=list[ProductResponse]
+)
+def get_related_products(
+    product_id: int,
+    db: Session = Depends(get_db)
+):
+    product = (
+        db.query(Product)
+        .filter(
+            Product.id == product_id,
+            Product.status == True
+        )
+        .first()
+    )
+
+    if not product:
+        raise HTTPException(
+            status_code=404,
+            detail="Product Not Found"
+        )
+
+    related_products = (
+        db.query(Product)
+        .filter(
+            Product.category_id == product.category_id,
+            Product.id != product.id,
+            Product.status == True
+        )
+        .limit(8)
+        .all()
+    )
+
+    return related_products
+
+
+# -------------------------------
 # Get Single Product
 # KEEP THIS ROUTE LAST
 # -------------------------------
@@ -128,7 +168,10 @@ def get_product(
 ):
     product = (
         db.query(Product)
-        .filter(Product.id == product_id)
+        .filter(
+            Product.id == product_id,
+            Product.status == True
+        )
         .first()
     )
 
@@ -137,8 +180,5 @@ def get_product(
             status_code=404,
             detail="Product Not Found"
         )
-
-
-
 
     return product

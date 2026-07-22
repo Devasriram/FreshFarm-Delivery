@@ -1,15 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from datetime import datetime
 
-from app.database import get_db
-from app.auth import get_current_customer
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
-from app.models.customer import Customer
-from app.models.product import Product
+from app.auth import get_current_customer
+from app.database import get_db
+
 from app.models.cart import CartItem
+from app.models.customer import Customer
 from app.models.order import Order
 from app.models.order_item import OrderItem
+from app.models.product import Product
 
 from app.schemas.order import (
     OrderCreate,
@@ -20,11 +21,16 @@ router = APIRouter(
     prefix="/orders",
     tags=["Orders"]
 )
-@router.post("/")
+
+
+@router.post(
+    "/",
+    response_model=OrderResponse
+)
 def place_order(
     order: OrderCreate,
     db: Session = Depends(get_db),
-    customer: Customer = Depends(get_current_customer)
+    customer: Customer = Depends(get_current_customer),
 ):
 
     cart_items = (
@@ -97,8 +103,7 @@ def place_order(
     )
 
     db.add(new_order)
-    db.commit()
-    db.refresh(new_order)
+    db.flush()
 
     # Create order items and reduce stock
     for cart in cart_items:
@@ -116,14 +121,14 @@ def place_order(
             product_id=product.id,
             quantity=cart.quantity,
             price=product.price,
-            total=item_total
+            total=item_total,
         )
 
         db.add(order_item)
 
         product.stock -= cart.quantity
 
-    # Clear cart
+    # Clear customer cart
     (
         db.query(CartItem)
         .filter(CartItem.customer_id == customer.id)
@@ -132,11 +137,15 @@ def place_order(
 
     db.commit()
 
-    return {
-        "message": "Order placed successfully.",
-        "order_id": new_order.id,
-        "order_number": new_order.order_number
-    }
+    # Reload order with relationships
+    order_data = (
+        db.query(Order)
+        .filter(Order.id == new_order.id)
+        .first()
+    )
+
+    return order_data
+
 
 @router.get(
     "/",
@@ -149,9 +158,7 @@ def get_orders(
 
     orders = (
         db.query(Order)
-        .filter(
-            Order.customer_id == customer.id
-        )
+        .filter(Order.customer_id == customer.id)
         .order_by(Order.created_at.desc())
         .all()
     )
@@ -173,7 +180,7 @@ def get_order(
         db.query(Order)
         .filter(
             Order.id == order_id,
-            Order.customer_id == customer.id
+            Order.customer_id == customer.id,
         )
         .first()
     )

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
   ShoppingCart,
   User,
@@ -14,19 +14,36 @@ function Header() {
 
   const { totalItems } = useCart();
 
+  const navigate = useNavigate();
+
   const navLinkClass = ({ isActive }) =>
     isActive
       ? "text-yellow-300 font-semibold"
       : "hover:text-green-200";
 
+  const goToSection = (id) => {
+    navigate("/home");
+
+    setTimeout(() => {
+      const section = document.getElementById(id);
+
+      if (section) {
+        section.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    }, 150);
+
+    setMobileMenu(false);
+  };
+
   return (
     <header className="bg-green-700 shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6">
 
-        {/* Top Header */}
         <div className="h-16 flex items-center justify-between">
 
-          {/* Logo */}
           <Link
             to="/home"
             className="text-white text-2xl font-bold"
@@ -44,28 +61,26 @@ function Header() {
               Home
             </NavLink>
 
-            <NavLink
-              to="/home"
-              className={navLinkClass}
+            <button
+              onClick={() => goToSection("categories")}
+              className="hover:text-green-200"
             >
               Categories
-            </NavLink>
+            </button>
 
-            <NavLink
-              to="/home"
-              className={navLinkClass}
+            <button
+              onClick={() => goToSection("featured")}
+              className="hover:text-green-200"
             >
               Featured
-            </NavLink>
+            </button>
 
-            <NavLink
-              to="/home"
-              className={navLinkClass}
+            <button
+              onClick={() => goToSection("popular")}
+              className="hover:text-green-200"
             >
               Popular
-            </NavLink>
-
-            {/* Cart */}
+            </button>
 
             <NavLink
               to="/cart"
@@ -80,8 +95,6 @@ function Header() {
               )}
             </NavLink>
 
-            {/* Profile */}
-
             <NavLink
               to="/customer/dashboard"
               className={navLinkClass}
@@ -92,22 +105,16 @@ function Header() {
           </nav>
 
           {/* Mobile Button */}
-
           <button
             onClick={() => setMobileMenu(!mobileMenu)}
             className="md:hidden text-white"
           >
-            {mobileMenu ? (
-              <X size={30} />
-            ) : (
-              <Menu size={30} />
-            )}
+            {mobileMenu ? <X size={30} /> : <Menu size={30} />}
           </button>
 
         </div>
 
         {/* Mobile Menu */}
-
         {mobileMenu && (
           <div className="md:hidden bg-green-700 pb-5">
 
@@ -120,26 +127,26 @@ function Header() {
                 Home
               </NavLink>
 
-              <NavLink
-                to="/home"
-                onClick={() => setMobileMenu(false)}
+              <button
+                onClick={() => goToSection("categories")}
+                className="text-left"
               >
                 Categories
-              </NavLink>
+              </button>
 
-              <NavLink
-                to="/home"
-                onClick={() => setMobileMenu(false)}
+              <button
+                onClick={() => goToSection("featured")}
+                className="text-left"
               >
                 Featured
-              </NavLink>
+              </button>
 
-              <NavLink
-                to="/home"
-                onClick={() => setMobileMenu(false)}
+              <button
+                onClick={() => goToSection("popular")}
+                className="text-left"
               >
                 Popular
-              </NavLink>
+              </button>
 
               <NavLink
                 to="/cart"

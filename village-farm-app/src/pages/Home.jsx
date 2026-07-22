@@ -61,41 +61,36 @@ function Home() {
   return (
     <div className="min-h-screen bg-green-50">
 
-      {/* Header */}
       <Header />
 
-      {/* Search */}
       <SearchBar onSearch={handleSearch} />
 
-      {/* Hero Banner */}
       <HeroBanner />
 
       {/* Categories */}
-      <section className="max-w-7xl mx-auto px-6 py-10">
-
+      <section
+        id="categories"
+        className="max-w-7xl mx-auto px-6 py-10"
+      >
         <h2 className="text-3xl font-bold text-gray-800 mb-8">
           Shop By Category
         </h2>
 
         <CategorySection />
-
       </section>
 
-      {/* Loading */}
       {loading && (
         <div className="text-center py-10 text-lg font-medium">
           Loading Products...
         </div>
       )}
 
-      {/* Error */}
       {error && (
         <div className="text-center py-10 text-red-600 text-lg">
           {error}
         </div>
       )}
 
-      {/* Search Results */}
       {!loading && !error && searchMode && (
         <section className="max-w-7xl mx-auto px-6 py-4">
           <ProductSection
@@ -105,9 +100,11 @@ function Home() {
         </section>
       )}
 
-      {/* Featured Products */}
       {!loading && !error && !searchMode && (
-        <section className="max-w-7xl mx-auto px-6 py-4">
+        <section
+          id="featured"
+          className="max-w-7xl mx-auto px-6 py-4"
+        >
           <ProductSection
             title="Featured Products"
             products={featuredProducts}
@@ -115,9 +112,11 @@ function Home() {
         </section>
       )}
 
-      {/* Popular Products */}
       {!loading && !error && !searchMode && (
-        <section className="max-w-7xl mx-auto px-6 py-8">
+        <section
+          id="popular"
+          className="max-w-7xl mx-auto px-6 py-8"
+        >
           <ProductSection
             title="Popular Products"
             products={popularProducts}
@@ -125,8 +124,8 @@ function Home() {
         </section>
       )}
 
-      {/* Footer */}
       <Footer />
+
     </div>
   );
 }

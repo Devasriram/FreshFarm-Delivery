@@ -1,18 +1,6 @@
-import { useState } from "react";
+import React from "react";
 
-function AddressForm() {
-  const [address, setAddress] = useState({
-    fullName: "",
-    mobile: "",
-    email: "",
-    houseNo: "",
-    street: "",
-    village: "",
-    city: "",
-    district: "",
-    state: "",
-    pincode: "",
-  });
+function AddressForm({ address, setAddress }) {
 
   const handleChange = (e) => {
     setAddress({
@@ -41,7 +29,7 @@ function AddressForm() {
             value={address.fullName}
             onChange={handleChange}
             placeholder="Enter Full Name"
-            className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-500 outline-none"
+            className="w-full border rounded-xl p-3"
           />
         </div>
 
@@ -56,7 +44,7 @@ function AddressForm() {
             value={address.mobile}
             onChange={handleChange}
             placeholder="Enter Mobile Number"
-            className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-500 outline-none"
+            className="w-full border rounded-xl p-3"
           />
         </div>
 
@@ -71,7 +59,7 @@ function AddressForm() {
             value={address.email}
             onChange={handleChange}
             placeholder="Enter Email"
-            className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-500 outline-none"
+            className="w-full border rounded-xl p-3"
           />
         </div>
 
@@ -86,7 +74,7 @@ function AddressForm() {
             value={address.houseNo}
             onChange={handleChange}
             placeholder="House / Door No"
-            className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-500 outline-none"
+            className="w-full border rounded-xl p-3"
           />
         </div>
 
@@ -101,7 +89,7 @@ function AddressForm() {
             value={address.street}
             onChange={handleChange}
             placeholder="Street Name"
-            className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-500 outline-none"
+            className="w-full border rounded-xl p-3"
           />
         </div>
 
@@ -116,7 +104,7 @@ function AddressForm() {
             value={address.village}
             onChange={handleChange}
             placeholder="Village"
-            className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-500 outline-none"
+            className="w-full border rounded-xl p-3"
           />
         </div>
 
@@ -131,7 +119,7 @@ function AddressForm() {
             value={address.city}
             onChange={handleChange}
             placeholder="City"
-            className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-500 outline-none"
+            className="w-full border rounded-xl p-3"
           />
         </div>
 
@@ -146,7 +134,7 @@ function AddressForm() {
             value={address.district}
             onChange={handleChange}
             placeholder="District"
-            className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-500 outline-none"
+            className="w-full border rounded-xl p-3"
           />
         </div>
 
@@ -161,7 +149,7 @@ function AddressForm() {
             value={address.state}
             onChange={handleChange}
             placeholder="State"
-            className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-500 outline-none"
+            className="w-full border rounded-xl p-3"
           />
         </div>
 
@@ -176,17 +164,11 @@ function AddressForm() {
             value={address.pincode}
             onChange={handleChange}
             placeholder="Pincode"
-            className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-500 outline-none"
+            className="w-full border rounded-xl p-3"
           />
         </div>
 
       </div>
-
-      <button
-        className="mt-8 bg-green-700 hover:bg-green-800 text-white px-8 py-3 rounded-xl font-semibold transition"
-      >
-        Save Address
-      </button>
 
     </div>
   );

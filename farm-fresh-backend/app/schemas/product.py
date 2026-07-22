@@ -24,6 +24,12 @@ class ProductResponse(BaseModel):
 
     status: bool
 
+    freshness_info: str | None = None
+
+    delivery_available: bool = True
+
+    additional_images: str | None = None
+
     model_config = ConfigDict(
         from_attributes=True
     )
