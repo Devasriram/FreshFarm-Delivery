@@ -10,13 +10,15 @@ from app.models import (
     CartItem,
     Order,
     OrderItem,
+    CustomerAddress,
 )
-
+from app.routers import address
 from app.routers.customers import router as customer_router
 from app.routers.categories import router as category_router
 from app.routers.products import router as product_router
 from app.routers.cart import router as cart_router
 from app.routers.orders import router as order_router
+
 
 Base.metadata.create_all(bind=engine)
 
@@ -38,7 +40,7 @@ app.include_router(category_router)
 app.include_router(product_router)
 app.include_router(cart_router)
 app.include_router(order_router)
-
+app.include_router(address.router)
 
 @app.get("/")
 def home():

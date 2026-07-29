@@ -10,17 +10,15 @@ from pydantic import BaseModel, ConfigDict
 class OrderAddress(BaseModel):
 
     full_name: str
-    mobile: str
-    email: str
+    mobile_number: str
 
-    house_no: str
-    street: str
+    door_street: str
     village: str
-
-    city: str
     district: str
     state: str
     pincode: str
+
+    landmark: str | None = None
 
 
 # -----------------------------
@@ -75,6 +73,7 @@ class OrderItemResponse(BaseModel):
 class OrderResponse(OrderAddress):
 
     id: int
+
     order_number: str
 
     total_amount: float

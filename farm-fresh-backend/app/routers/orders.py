@@ -47,7 +47,7 @@ def place_order(
 
     subtotal = 0
 
-    # Validate stock and calculate subtotal
+    # Validate stock
     for cart in cart_items:
 
         product = (
@@ -90,22 +90,18 @@ def place_order(
         payment_method=order.payment_method,
 
         full_name=order.full_name,
-        mobile=order.mobile,
-        email=order.email,
-
-        house_no=order.house_no,
-        street=order.street,
+        mobile_number=order.mobile_number,
+        door_street=order.door_street,
         village=order.village,
-        city=order.city,
         district=order.district,
         state=order.state,
         pincode=order.pincode,
+        landmark=order.landmark,
     )
 
     db.add(new_order)
     db.flush()
 
-    # Create order items and reduce stock
     for cart in cart_items:
 
         product = (
@@ -114,21 +110,18 @@ def place_order(
             .first()
         )
 
-        item_total = float(product.price) * cart.quantity
-
         order_item = OrderItem(
             order_id=new_order.id,
             product_id=product.id,
             quantity=cart.quantity,
             price=product.price,
-            total=item_total,
+            total=float(product.price) * cart.quantity,
         )
 
         db.add(order_item)
 
         product.stock -= cart.quantity
 
-    # Clear customer cart
     (
         db.query(CartItem)
         .filter(CartItem.customer_id == customer.id)
@@ -136,15 +129,9 @@ def place_order(
     )
 
     db.commit()
+    db.refresh(new_order)
 
-    # Reload order with relationships
-    order_data = (
-        db.query(Order)
-        .filter(Order.id == new_order.id)
-        .first()
-    )
-
-    return order_data
+    return new_order
 
 
 @router.get(
@@ -153,17 +140,15 @@ def place_order(
 )
 def get_orders(
     db: Session = Depends(get_db),
-    customer: Customer = Depends(get_current_customer)
+    customer: Customer = Depends(get_current_customer),
 ):
 
-    orders = (
+    return (
         db.query(Order)
         .filter(Order.customer_id == customer.id)
         .order_by(Order.created_at.desc())
         .all()
     )
-
-    return orders
 
 
 @router.get(
@@ -173,7 +158,7 @@ def get_orders(
 def get_order(
     order_id: int,
     db: Session = Depends(get_db),
-    customer: Customer = Depends(get_current_customer)
+    customer: Customer = Depends(get_current_customer),
 ):
 
     order = (
@@ -188,7 +173,7 @@ def get_order(
     if not order:
         raise HTTPException(
             status_code=404,
-            detail="Order Not Found"
+            detail="Order not found."
         )
 
     return order

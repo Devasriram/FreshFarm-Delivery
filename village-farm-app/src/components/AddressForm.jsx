@@ -1,176 +1,217 @@
-import React from "react";
+import { useEffect, useState } from "react";
 
-function AddressForm({ address, setAddress }) {
+function AddressForm({
+  initialData,
+  onSubmit,
+  onCancel,
+  loading = false,
+}) {
+  const [form, setForm] = useState({
+    full_name: "",
+    mobile_number: "",
+    door_street: "",
+    village: "",
+    district: "",
+    state: "",
+    pincode: "",
+    landmark: "",
+    is_default: false,
+  });
+
+  useEffect(() => {
+    if (initialData) {
+      setForm({
+        full_name: initialData.full_name || "",
+        mobile_number: initialData.mobile_number || "",
+        door_street: initialData.door_street || "",
+        village: initialData.village || "",
+        district: initialData.district || "",
+        state: initialData.state || "",
+        pincode: initialData.pincode || "",
+        landmark: initialData.landmark || "",
+        is_default: initialData.is_default || false,
+      });
+    }
+  }, [initialData]);
 
   const handleChange = (e) => {
-    setAddress({
-      ...address,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value, type, checked } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (
+      !form.full_name ||
+      !form.mobile_number ||
+      !form.door_street ||
+      !form.village ||
+      !form.district ||
+      !form.state ||
+      !form.pincode
+    ) {
+      alert("Please fill all required fields.");
+      return;
+    }
+
+    if (!/^\d{10}$/.test(form.mobile_number)) {
+      alert("Mobile number must contain 10 digits.");
+      return;
+    }
+
+    if (!/^\d{6}$/.test(form.pincode)) {
+      alert("Pincode must contain 6 digits.");
+      return;
+    }
+
+    onSubmit(form);
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-md p-8">
-
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">
-        Delivery Address
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white rounded-xl shadow-md p-6"
+    >
+      <h2 className="text-2xl font-bold mb-6">
+        {initialData ? "Edit Address" : "Add New Address"}
       </h2>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 gap-5">
 
         <div>
-          <label className="block mb-2 font-medium">
-            Full Name
-          </label>
-
+          <label className="font-medium">Full Name *</label>
           <input
             type="text"
-            name="fullName"
-            value={address.fullName}
+            name="full_name"
+            value={form.full_name}
             onChange={handleChange}
-            placeholder="Enter Full Name"
-            className="w-full border rounded-xl p-3"
+            className="w-full border rounded-lg p-3 mt-1"
           />
         </div>
 
         <div>
-          <label className="block mb-2 font-medium">
-            Mobile Number
-          </label>
-
+          <label className="font-medium">Mobile Number *</label>
           <input
             type="text"
-            name="mobile"
-            value={address.mobile}
+            name="mobile_number"
+            value={form.mobile_number}
             onChange={handleChange}
-            placeholder="Enter Mobile Number"
-            className="w-full border rounded-xl p-3"
-          />
-        </div>
-
-        <div>
-          <label className="block mb-2 font-medium">
-            Email
-          </label>
-
-          <input
-            type="email"
-            name="email"
-            value={address.email}
-            onChange={handleChange}
-            placeholder="Enter Email"
-            className="w-full border rounded-xl p-3"
-          />
-        </div>
-
-        <div>
-          <label className="block mb-2 font-medium">
-            House No
-          </label>
-
-          <input
-            type="text"
-            name="houseNo"
-            value={address.houseNo}
-            onChange={handleChange}
-            placeholder="House / Door No"
-            className="w-full border rounded-xl p-3"
+            className="w-full border rounded-lg p-3 mt-1"
           />
         </div>
 
         <div className="md:col-span-2">
-          <label className="block mb-2 font-medium">
-            Street
+          <label className="font-medium">
+            Door No / Street *
           </label>
-
           <input
             type="text"
-            name="street"
-            value={address.street}
+            name="door_street"
+            value={form.door_street}
             onChange={handleChange}
-            placeholder="Street Name"
-            className="w-full border rounded-xl p-3"
+            className="w-full border rounded-lg p-3 mt-1"
           />
         </div>
 
         <div>
-          <label className="block mb-2 font-medium">
-            Village
-          </label>
-
+          <label className="font-medium">Village *</label>
           <input
             type="text"
             name="village"
-            value={address.village}
+            value={form.village}
             onChange={handleChange}
-            placeholder="Village"
-            className="w-full border rounded-xl p-3"
+            className="w-full border rounded-lg p-3 mt-1"
           />
         </div>
 
         <div>
-          <label className="block mb-2 font-medium">
-            City
-          </label>
-
-          <input
-            type="text"
-            name="city"
-            value={address.city}
-            onChange={handleChange}
-            placeholder="City"
-            className="w-full border rounded-xl p-3"
-          />
-        </div>
-
-        <div>
-          <label className="block mb-2 font-medium">
-            District
-          </label>
-
+          <label className="font-medium">District *</label>
           <input
             type="text"
             name="district"
-            value={address.district}
+            value={form.district}
             onChange={handleChange}
-            placeholder="District"
-            className="w-full border rounded-xl p-3"
+            className="w-full border rounded-lg p-3 mt-1"
           />
         </div>
 
         <div>
-          <label className="block mb-2 font-medium">
-            State
-          </label>
-
+          <label className="font-medium">State *</label>
           <input
             type="text"
             name="state"
-            value={address.state}
+            value={form.state}
             onChange={handleChange}
-            placeholder="State"
-            className="w-full border rounded-xl p-3"
+            className="w-full border rounded-lg p-3 mt-1"
           />
         </div>
 
         <div>
-          <label className="block mb-2 font-medium">
-            Pincode
-          </label>
-
+          <label className="font-medium">Pincode *</label>
           <input
             type="text"
             name="pincode"
-            value={address.pincode}
+            value={form.pincode}
             onChange={handleChange}
-            placeholder="Pincode"
-            className="w-full border rounded-xl p-3"
+            className="w-full border rounded-lg p-3 mt-1"
           />
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="font-medium">
+            Landmark (Optional)
+          </label>
+          <input
+            type="text"
+            name="landmark"
+            value={form.landmark}
+            onChange={handleChange}
+            className="w-full border rounded-lg p-3 mt-1"
+          />
+        </div>
+
+        <div className="md:col-span-2 flex items-center gap-2">
+          <input
+            type="checkbox"
+            name="is_default"
+            checked={form.is_default}
+            onChange={handleChange}
+          />
+
+          <label>Set as Default Address</label>
         </div>
 
       </div>
 
-    </div>
+      <div className="flex justify-end gap-3 mt-8">
+
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-6 py-3 rounded-lg border"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700"
+        >
+          {loading
+            ? "Saving..."
+            : initialData
+            ? "Update Address"
+            : "Save Address"}
+        </button>
+
+      </div>
+    </form>
   );
 }
 

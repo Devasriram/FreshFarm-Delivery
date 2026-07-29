@@ -1,12 +1,11 @@
-import { useState } from "react";
-
-function PaymentSummary() {
-  const [paymentMethod, setPaymentMethod] = useState("cod");
-
+function PaymentSummary({
+  paymentMethod,
+  setPaymentMethod,
+}) {
   return (
-    <div className="bg-white rounded-2xl shadow-md p-8">
+    <div className="bg-white rounded-xl shadow-md p-6">
 
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">
+      <h2 className="text-2xl font-bold mb-6">
         Payment Method
       </h2>
 
@@ -14,149 +13,69 @@ function PaymentSummary() {
 
         {/* Cash On Delivery */}
 
-        <label className="flex items-center justify-between border rounded-xl p-4 cursor-pointer hover:border-green-600">
+        <label className="flex items-center justify-between border rounded-lg p-4 cursor-pointer hover:border-green-500">
 
-          <div>
+          <div className="flex items-center gap-3">
 
-            <h3 className="font-semibold">
-              Cash On Delivery
-            </h3>
+            <input
+              type="radio"
+              value="Cash on Delivery"
+              checked={
+                paymentMethod ===
+                "Cash on Delivery"
+              }
+              onChange={(e) =>
+                setPaymentMethod(e.target.value)
+              }
+            />
 
-            <p className="text-gray-500 text-sm">
-              Pay when your order is delivered
-            </p>
+            <div>
+              <p className="font-semibold">
+                Cash on Delivery
+              </p>
 
-          </div>
-
-          <input
-            type="radio"
-            name="payment"
-            value="cod"
-            checked={paymentMethod === "cod"}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-          />
-
-        </label>
-
-        {/* UPI */}
-
-        <label className="flex items-center justify-between border rounded-xl p-4 cursor-pointer hover:border-green-600">
-
-          <div>
-
-            <h3 className="font-semibold">
-              UPI
-            </h3>
-
-            <p className="text-gray-500 text-sm">
-              Google Pay / PhonePe / Paytm
-            </p>
+              <p className="text-sm text-gray-500">
+                Pay when your order is delivered.
+              </p>
+            </div>
 
           </div>
 
-          <input
-            type="radio"
-            name="payment"
-            value="upi"
-            checked={paymentMethod === "upi"}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-          />
-
         </label>
 
-        {/* Credit Card */}
+        {/* Online Payment */}
 
-        <label className="flex items-center justify-between border rounded-xl p-4 cursor-pointer hover:border-green-600">
+        <label className="flex items-center justify-between border rounded-lg p-4 cursor-pointer hover:border-green-500">
 
-          <div>
+          <div className="flex items-center gap-3">
 
-            <h3 className="font-semibold">
-              Credit / Debit Card
-            </h3>
+            <input
+              type="radio"
+              value="Online Payment"
+              checked={
+                paymentMethod ===
+                "Online Payment"
+              }
+              onChange={(e) =>
+                setPaymentMethod(e.target.value)
+              }
+            />
 
-            <p className="text-gray-500 text-sm">
-              Visa • MasterCard • RuPay
-            </p>
+            <div>
+
+              <p className="font-semibold">
+                Online Payment
+              </p>
+
+              <p className="text-sm text-gray-500">
+                (Coming Soon)
+              </p>
+
+            </div>
 
           </div>
 
-          <input
-            type="radio"
-            name="payment"
-            value="card"
-            checked={paymentMethod === "card"}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-          />
-
         </label>
-
-        {/* Net Banking */}
-
-        <label className="flex items-center justify-between border rounded-xl p-4 cursor-pointer hover:border-green-600">
-
-          <div>
-
-            <h3 className="font-semibold">
-              Net Banking
-            </h3>
-
-            <p className="text-gray-500 text-sm">
-              All major banks supported
-            </p>
-
-          </div>
-
-          <input
-            type="radio"
-            name="payment"
-            value="netbanking"
-            checked={paymentMethod === "netbanking"}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-          />
-
-        </label>
-
-        {/* Wallet */}
-
-        <label className="flex items-center justify-between border rounded-xl p-4 cursor-pointer hover:border-green-600">
-
-          <div>
-
-            <h3 className="font-semibold">
-              Wallet
-            </h3>
-
-            <p className="text-gray-500 text-sm">
-              Amazon Pay • Mobikwik • Freecharge
-            </p>
-
-          </div>
-
-          <input
-            type="radio"
-            name="payment"
-            value="wallet"
-            checked={paymentMethod === "wallet"}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-          />
-
-        </label>
-
-      </div>
-
-      <div className="mt-8 bg-green-50 border border-green-200 rounded-xl p-4">
-
-        <h3 className="font-semibold text-green-700">
-          Selected Payment Method
-        </h3>
-
-        <p className="mt-2 text-gray-700 capitalize">
-          {paymentMethod === "cod" && "Cash On Delivery"}
-          {paymentMethod === "upi" && "UPI"}
-          {paymentMethod === "card" && "Credit / Debit Card"}
-          {paymentMethod === "netbanking" && "Net Banking"}
-          {paymentMethod === "wallet" && "Wallet"}
-        </p>
 
       </div>
 

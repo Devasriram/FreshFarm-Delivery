@@ -36,12 +36,12 @@ class OrderItem(Base):
     )
 
     price = Column(
-        DECIMAL(10,2),
+        DECIMAL(10, 2),
         nullable=False
     )
 
     total = Column(
-        DECIMAL(10,2),
+        DECIMAL(10, 2),
         nullable=False
     )
 
@@ -50,6 +50,4 @@ class OrderItem(Base):
         back_populates="items"
     )
 
-    product = relationship(
-        "Product"
-    )
+    product = relationship("Product")

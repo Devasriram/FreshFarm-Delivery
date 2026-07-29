@@ -34,27 +34,28 @@ class Order(Base):
     )
 
     total_amount = Column(
-        DECIMAL(10,2),
+        DECIMAL(10, 2),
         nullable=False
     )
 
     delivery_charge = Column(
-        DECIMAL(10,2),
+        DECIMAL(10, 2),
         default=0
     )
 
     gst = Column(
-        DECIMAL(10,2),
+        DECIMAL(10, 2),
         default=0
     )
 
     grand_total = Column(
-        DECIMAL(10,2),
+        DECIMAL(10, 2),
         nullable=False
     )
 
     payment_method = Column(
-        String(50)
+        String(50),
+        nullable=False
     )
 
     payment_status = Column(
@@ -68,43 +69,42 @@ class Order(Base):
     )
 
     full_name = Column(
-        String(150)
+        String(150),
+        nullable=False
     )
 
-    mobile = Column(
-        String(20)
+    mobile_number = Column(
+        String(20),
+        nullable=False
     )
 
-    email = Column(
-        String(150)
-    )
-
-    house_no = Column(
-        String(100)
-    )
-
-    street = Column(
-        String(150)
+    door_street = Column(
+        String(255),
+        nullable=False
     )
 
     village = Column(
-        String(150)
-    )
-
-    city = Column(
-        String(100)
+        String(150),
+        nullable=False
     )
 
     district = Column(
-        String(100)
+        String(100),
+        nullable=False
     )
 
     state = Column(
-        String(100)
+        String(100),
+        nullable=False
     )
 
     pincode = Column(
-        String(20)
+        String(20),
+        nullable=False
+    )
+
+    landmark = Column(
+        String(255)
     )
 
     created_at = Column(
