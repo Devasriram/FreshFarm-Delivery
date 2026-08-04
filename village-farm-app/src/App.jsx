@@ -10,8 +10,8 @@ import CartPage from "./pages/CartPage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Checkout from "./pages/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
-import Orders from "./pages/Orders";
 import OrderDetails from "./pages/OrderDetails";
+import MyOrders from "./pages/MyOrders";
 
 function App() {
   return (
@@ -88,18 +88,18 @@ function App() {
 />
 
 <Route
-  path="/orders"
+  path="/my-orders/:id"
   element={
     <ProtectedRoute>
-      <Orders />
+      <OrderDetails />
     </ProtectedRoute>
   }
 />
 <Route
-  path="/orders/:id"
+  path="/my-orders"
   element={
     <ProtectedRoute>
-      <OrderDetails />
+      <MyOrders />
     </ProtectedRoute>
   }
 />

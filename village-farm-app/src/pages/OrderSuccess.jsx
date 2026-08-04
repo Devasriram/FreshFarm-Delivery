@@ -154,7 +154,7 @@ function OrderSuccess() {
           </button>
 
           <button
-            onClick={() => navigate("/orders")}
+            onClick={() => navigate("/my-orders")}
             className="flex-1 border border-green-700 text-green-700 py-3 rounded-xl"
           >
             My Orders

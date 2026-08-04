@@ -92,3 +92,52 @@ class OrderResponse(OrderAddress):
     model_config = ConfigDict(
         from_attributes=True
     )
+
+    # -----------------------------
+# Order Status History Response
+# -----------------------------
+
+class OrderStatusHistoryResponse(BaseModel):
+
+    status: str
+    updated_at: datetime
+
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+
+
+# -----------------------------
+# Order Tracking Response
+# -----------------------------
+
+class OrderTrackingResponse(BaseModel):
+
+    order_id: int
+    current_status: str
+
+    history: list[OrderStatusHistoryResponse]
+
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+
+
+# -----------------------------
+# Cancel Order Response
+# -----------------------------
+
+class CancelOrderResponse(BaseModel):
+
+    message: str
+    order_status: str
+
+
+# -----------------------------
+# Reorder Response
+# -----------------------------
+
+class ReorderResponse(BaseModel):
+
+    message: str
+    new_order_id: int | None = None

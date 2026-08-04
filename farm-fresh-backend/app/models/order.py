@@ -65,7 +65,7 @@ class Order(Base):
 
     order_status = Column(
         String(30),
-        default="Placed"
+        default="Pending"
     )
 
     full_name = Column(
