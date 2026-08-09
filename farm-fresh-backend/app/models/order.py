@@ -112,13 +112,28 @@ class Order(Base):
         server_default=func.now()
     )
 
+    # Customer Relationship
     customer = relationship(
         "Customer",
         back_populates="orders"
     )
 
+    # Order Items Relationship
     items = relationship(
         "OrderItem",
         back_populates="order",
         cascade="all, delete-orphan"
+    )
+
+    # Delivery Partner Foreign Key
+    delivery_partner_id = Column(
+        Integer,
+        ForeignKey("delivery_partners.id"),
+        nullable=True
+    )
+
+    # Delivery Partner Relationship
+    delivery_partner = relationship(
+        "DeliveryPartner",
+        back_populates="orders"
     )

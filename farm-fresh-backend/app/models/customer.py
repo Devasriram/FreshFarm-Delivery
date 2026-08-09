@@ -3,6 +3,7 @@ from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import DateTime
 from sqlalchemy.sql import func
+from sqlalchemy import Boolean
 
 from sqlalchemy.orm import relationship
 
@@ -69,4 +70,8 @@ class Customer(Base):
     "CustomerAddress",
     back_populates="customer",
     cascade="all, delete-orphan"
+)
+    status = Column(
+    Boolean,
+    default=True
 )
