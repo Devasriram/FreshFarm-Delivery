@@ -83,6 +83,13 @@ function Header() {
             </button>
 
             <NavLink
+              to="/my-orders"
+              className={navLinkClass}
+            >
+              My Orders
+            </NavLink>
+
+            <NavLink
               to="/cart"
               className="relative"
             >
@@ -149,6 +156,13 @@ function Header() {
               </button>
 
               <NavLink
+                to="/my-orders"
+                onClick={() => setMobileMenu(false)}
+              >
+                My Orders
+              </NavLink>
+
+              <NavLink
                 to="/cart"
                 onClick={() => setMobileMenu(false)}
               >
@@ -162,10 +176,17 @@ function Header() {
                 Profile
               </NavLink>
 
+              <NavLink
+                to="/delivery/login"
+                onClick={() => setMobileMenu(false)}
+                className="text-yellow-300 font-semibold"
+              >
+                Delivery Partner Portal →
+              </NavLink>
             </div>
-
           </div>
         )}
+
 
       </div>
     </header>

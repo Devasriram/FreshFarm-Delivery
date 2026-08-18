@@ -57,4 +57,10 @@ def monthly_sales(db: Session = Depends(get_db)):
         .all()
     )
 
-    return data
+    return [
+        {
+            "month": int(row.month) if row.month is not None else 0,
+            "revenue": float(row.revenue or 0),
+        }
+        for row in data
+    ]

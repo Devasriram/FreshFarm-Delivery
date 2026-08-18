@@ -5,25 +5,20 @@
   import App from "./App";
   import "./index.css";
 
-  import { AuthProvider } from "./context/AuthContext";
-  import { CartProvider } from "./context/CartContext";
+import { AuthProvider } from "./context/AuthContext";
+import { CartProvider } from "./context/CartContext";
+import { DeliveryAuthProvider } from "./context/DeliveryAuthContext";
 
-  ReactDOM.createRoot(document.getElementById("root")).render(
-    <React.StrictMode>
-
-      <BrowserRouter>
-
-        <AuthProvider>
-
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <AuthProvider>
+        <DeliveryAuthProvider>
           <CartProvider>
-
             <App />
-
           </CartProvider>
-
-        </AuthProvider>
-
-      </BrowserRouter>
-
-    </React.StrictMode>
-  );
+        </DeliveryAuthProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  </React.StrictMode>
+);

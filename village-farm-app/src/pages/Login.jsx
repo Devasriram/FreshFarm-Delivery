@@ -118,14 +118,28 @@ function Login() {
             </Link>
           </div>
 
-          <div className="text-center mt-4">
+          <div className="text-center mt-4 text-sm text-gray-600">
             Don't have an account?
-
             <Link
               to="/register"
-              className="text-green-700 font-semibold ml-2"
+              className="text-green-700 font-bold ml-1.5 hover:underline"
             >
               Register
+            </Link>
+          </div>
+
+          <div className="mt-6 pt-5 border-t border-gray-200 flex justify-between items-center text-xs">
+            <Link
+              to="/admin/login"
+              className="font-bold text-slate-800 hover:text-green-700 transition"
+            >
+              🛡️ Admin Login
+            </Link>
+            <Link
+              to="/delivery/login"
+              className="font-bold text-emerald-700 hover:text-emerald-800 transition"
+            >
+              🚚 Delivery Partner Login →
             </Link>
           </div>
 
@@ -134,5 +148,6 @@ function Login() {
     </>
   );
 }
+
 
 export default Login;

@@ -23,9 +23,15 @@ export function CartProvider({ children }) {
 
       const data = await getCartItems();
 
-      setCart(data);
+      setCart(data || []);
     } catch (err) {
-      console.error("Unable to load cart", err);
+      if (err.response?.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("customer");
+        console.warn("Session expired or invalid customer token. Cart cleared.");
+      } else {
+        console.error("Unable to load cart", err);
+      }
       setCart([]);
     } finally {
       setLoading(false);
