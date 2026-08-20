@@ -15,6 +15,21 @@ class CustomerLogin(BaseModel):
     password: str
 
 
+class SendOtpRequest(BaseModel):
+    mobile_number: str
+
+
+class SendOtpResponse(BaseModel):
+    message: str
+    mobile_number: str
+    otp: str  # returned for testing/development display
+
+
+class VerifyOtpRequest(BaseModel):
+    mobile_number: str
+    otp: str
+
+
 class CustomerResponse(BaseModel):
     customer_id: str
     full_name: str

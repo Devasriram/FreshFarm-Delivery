@@ -69,4 +69,10 @@ class DeliveryPartner(Base):
         "DeliveryAssignment",
         back_populates="delivery_partner",
         cascade="all, delete-orphan"
+    )
+
+    delivery_histories = relationship(
+        "DeliveryHistory",
+        back_populates="delivery_partner",
+        cascade="all, delete-orphan"
     )

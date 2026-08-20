@@ -11,6 +11,11 @@ import {
   ShoppingBag,
   ChevronDown,
   ChevronUp,
+  Copy,
+  Check,
+  Eye,
+  X,
+  Bike,
 } from "lucide-react";
 import {
   getAssignedOrders,
@@ -23,6 +28,9 @@ function AssignedOrders() {
   const [updatingId, setUpdatingId] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
   const [filter, setFilter] = useState("All");
+  const [callingCustomer, setCallingCustomer] = useState(null);
+  const [copiedNumber, setCopiedNumber] = useState(false);
+  const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
 
   useEffect(() => {
     loadOrders();
@@ -64,6 +72,12 @@ function AssignedOrders() {
     setExpandedId(expandedId === id ? null : id);
   };
 
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text);
+    setCopiedNumber(true);
+    setTimeout(() => setCopiedNumber(false), 2000);
+  };
+
   const filteredOrders = orders.filter((order) => {
     if (filter === "All") return true;
     return order.delivery_status === filter;
@@ -73,7 +87,7 @@ function AssignedOrders() {
     switch (status) {
       case "Assigned":
         return {
-          label: "Accept Delivery",
+          label: "Accept Order",
           nextStatus: "Accepted",
           btnColor: "bg-blue-600 hover:bg-blue-700 text-white",
         };
@@ -174,7 +188,7 @@ function AssignedOrders() {
                 <div className="bg-slate-900 text-white p-4 flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black text-sm">
-                      #{order.order_number.slice(-4)}
+                      #{order.order_number?.slice(-4)}
                     </div>
                     <div>
                       <div className="font-bold text-sm leading-tight flex items-center gap-2">
@@ -193,7 +207,9 @@ function AssignedOrders() {
                           ? "bg-amber-400 text-slate-900"
                           : order.delivery_status === "Assigned"
                           ? "bg-purple-500/20 text-purple-300 border border-purple-400/30"
-                          : "bg-blue-500/20 text-blue-300 border border-blue-400/30"
+                          : order.delivery_status === "Accepted"
+                          ? "bg-blue-500/20 text-blue-300 border border-blue-400/30"
+                          : "bg-indigo-500/20 text-indigo-300 border border-indigo-400/30"
                       }`}
                     >
                       Status: {order.delivery_status}
@@ -210,7 +226,7 @@ function AssignedOrders() {
                         <MapPin size={18} className="text-emerald-600 shrink-0 mt-0.5" />
                         <div>
                           <div className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                            Delivery Address
+                            Delivery Destination
                           </div>
                           <div className="font-semibold text-sm text-slate-800 mt-0.5">
                             {order.customer_name}
@@ -221,14 +237,22 @@ function AssignedOrders() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3 pt-2">
-                        <a
-                          href={`tel:${order.mobile_number}`}
-                          className="inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition"
+                      <div className="flex items-center gap-2 pt-2 flex-wrap">
+                        <button
+                          onClick={() => setCallingCustomer(order)}
+                          className="inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-lg text-xs font-semibold transition"
                         >
-                          <Phone size={13} />
+                          <Phone size={13} className="text-emerald-600" />
                           <span>Call: {order.mobile_number}</span>
-                        </a>
+                        </button>
+
+                        <button
+                          onClick={() => setSelectedOrderDetails(order)}
+                          className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition"
+                        >
+                          <Eye size={13} />
+                          <span>View Details</span>
+                        </button>
                       </div>
                     </div>
 
@@ -264,7 +288,7 @@ function AssignedOrders() {
                     </div>
                   </div>
 
-                  {/* Items Toggle Button */}
+                  {/* Items Toggle Accordion */}
                   <div className="pt-2 border-t border-slate-100">
                     <button
                       onClick={() => toggleExpand(order.order_id)}
@@ -304,11 +328,20 @@ function AssignedOrders() {
 
                   {/* Workflow Action Bar */}
                   <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                      <Clock size={14} />
-                      <span>
-                        Current Status: <strong className="text-slate-800">{order.delivery_status}</strong>
-                      </span>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-slate-500">Quick Status Update:</span>
+                      <select
+                        value={order.delivery_status}
+                        onChange={(e) => handleStatusChange(order.order_id, e.target.value)}
+                        disabled={isUpdating}
+                        className="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      >
+                        <option value="Assigned">Assigned</option>
+                        <option value="Accepted">Accepted</option>
+                        <option value="Picked Up">Picked Up</option>
+                        <option value="Out for Delivery">Out for Delivery</option>
+                        <option value="Delivered">Delivered</option>
+                      </select>
                     </div>
 
                     <div className="flex items-center gap-2 flex-wrap">
@@ -318,7 +351,7 @@ function AssignedOrders() {
                             handleStatusChange(order.order_id, nextAction.nextStatus)
                           }
                           disabled={isUpdating}
-                          className={`${nextAction.btnColor} px-5 py-2.5 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50 min-w-[150px]`}
+                          className={`${nextAction.btnColor} px-5 py-2 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50 min-w-[150px]`}
                         >
                           {isUpdating ? (
                             <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
@@ -336,6 +369,120 @@ function AssignedOrders() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Call Customer Modal */}
+      {callingCustomer && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center space-y-4">
+            <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+              <Phone size={24} />
+            </div>
+
+            <div>
+              <h3 className="font-bold text-base text-slate-800">
+                Contact Customer
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {callingCustomer.customer_name} • Order #{callingCustomer.order_number}
+              </p>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex items-center justify-between">
+              <span className="font-mono text-base font-bold text-slate-800">
+                {callingCustomer.mobile_number}
+              </span>
+              <button
+                onClick={() => handleCopy(callingCustomer.mobile_number)}
+                className="text-slate-500 hover:text-slate-800 p-1.5 rounded-lg hover:bg-slate-200 transition"
+                title="Copy Number"
+              >
+                {copiedNumber ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                onClick={() => setCallingCustomer(null)}
+                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-xs transition"
+              >
+                Close
+              </button>
+              <a
+                href={`tel:${callingCustomer.mobile_number}`}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md"
+              >
+                <Phone size={14} />
+                <span>Call Now</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Order Details Modal */}
+      {selectedOrderDetails && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div>
+                <h3 className="font-bold text-base text-slate-900">
+                  Order Details #{selectedOrderDetails.order_number}
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Customer: {selectedOrderDetails.customer_name}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedOrderDetails(null)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                <div className="font-bold text-slate-700 mb-1">Delivery Address:</div>
+                <div className="text-slate-600 leading-relaxed">
+                  {selectedOrderDetails.full_address}
+                </div>
+              </div>
+
+              <div>
+                <div className="font-bold text-slate-800 mb-2">Items to Deliver:</div>
+                <div className="space-y-1.5">
+                  {selectedOrderDetails.items?.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200"
+                    >
+                      <div>
+                        <span className="font-semibold text-slate-800">{item.product_name}</span>
+                        <span className="text-slate-500 ml-2">x {item.quantity}</span>
+                      </div>
+                      <span className="font-bold text-slate-800">₹{item.total.toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-200 flex justify-between items-center text-emerald-900">
+                <span className="font-bold">Total Collection Amount:</span>
+                <span className="text-lg font-black text-emerald-800">
+                  ₹{selectedOrderDetails.grand_total.toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setSelectedOrderDetails(null)}
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded-xl text-xs transition"
+            >
+              Close Details
+            </button>
+          </div>
         </div>
       )}
     </div>

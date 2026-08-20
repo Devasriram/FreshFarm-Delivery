@@ -107,6 +107,12 @@ class Order(Base):
         String(255)
     )
 
+    estimated_delivery_time = Column(
+        String(100),
+        nullable=True,
+        default="Today within 2-3 hours"
+    )
+
     created_at = Column(
         DateTime(timezone=True),
         server_default=func.now()
@@ -136,4 +142,20 @@ class Order(Base):
     delivery_partner = relationship(
         "DeliveryPartner",
         back_populates="orders"
+    )
+
+    # Order Tracking History Relationship
+    tracking_history = relationship(
+        "OrderTracking",
+        back_populates="order",
+        cascade="all, delete-orphan",
+        order_by="OrderTracking.updated_at.asc()"
+    )
+
+    # Delivery History Relationship
+    delivery_history_records = relationship(
+        "DeliveryHistory",
+        back_populates="order",
+        cascade="all, delete-orphan",
+        order_by="DeliveryHistory.assigned_at.asc()"
     )

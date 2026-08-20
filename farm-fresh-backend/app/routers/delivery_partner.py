@@ -11,6 +11,8 @@ from app.models.order_item import OrderItem
 from app.models.product import Product
 from app.models.customer import Customer
 from app.models.order_status_history import OrderStatusHistory
+from app.models.order_tracking import OrderTracking
+from app.models.delivery_history import DeliveryHistory
 from app.security import verify_password, hash_password, create_access_token
 from app.auth import get_current_delivery_partner
 from app.schemas.delivery import (
@@ -363,20 +365,55 @@ def update_delivery_status(
     else:
         assignment.delivery_status = payload.status
 
-    # Map delivery status to order_status
+    # Update or insert into DeliveryHistory table
+    dh = (
+        db.query(DeliveryHistory)
+        .filter(
+            DeliveryHistory.order_id == order.id,
+            DeliveryHistory.delivery_partner_id == current_partner.id
+        )
+        .first()
+    )
+    if not dh:
+        dh = DeliveryHistory(
+            order_id=order.id,
+            delivery_partner_id=current_partner.id,
+            delivery_status=payload.status,
+            delivered_at=func.now() if payload.status == "Delivered" else None
+        )
+        db.add(dh)
+    else:
+        dh.delivery_status = payload.status
+        if payload.status == "Delivered":
+            dh.delivered_at = func.now()
+
+    # Add to order_tracking table
+    tracking_label = payload.status
     if payload.status == "Accepted":
-        order.order_status = "Preparing"
+        tracking_label = "Order Confirmed"
+        order.order_status = "Confirmed"
     elif payload.status == "Picked Up":
+        tracking_label = "Picked Up"
         order.order_status = "Preparing"
     elif payload.status == "Out for Delivery":
+        tracking_label = "Out for Delivery"
         order.order_status = "Out for Delivery"
     elif payload.status == "Delivered":
+        tracking_label = "Delivered"
         order.order_status = "Delivered"
         assignment.delivered_at = func.now()
         if order.payment_method.lower() in ["cash on delivery", "cod"]:
             order.payment_status = "Paid"
 
-    # Add tracking record
+    db.add(
+        OrderTracking(
+            order_id=order.id,
+            status=tracking_label,
+            updated_by=f"Delivery Partner - {current_partner.partner_name} ({current_partner.partner_id or current_partner.id})"
+        )
+    )
+
+    # Add tracking record to legacy table
     db.add(
         OrderStatusHistory(
             order_id=order.id,

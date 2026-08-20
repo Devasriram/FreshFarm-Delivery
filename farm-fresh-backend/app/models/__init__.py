@@ -6,5 +6,7 @@ from .address import CustomerAddress
 from .order import Order
 from .order_item import OrderItem
 from .order_status_history import OrderStatusHistory
+from .order_tracking import OrderTracking
 from .delivery import DeliveryPartner
-from .delivery_assignment import DeliveryAssignment
+from .delivery_assignment import DeliveryAssignment
+from .delivery_history import DeliveryHistory

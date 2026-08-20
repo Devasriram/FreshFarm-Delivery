@@ -1,6 +1,5 @@
 from datetime import datetime
-
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_customer
@@ -11,6 +10,9 @@ from app.models.customer import Customer
 from app.models.order import Order
 from app.models.order_item import OrderItem
 from app.models.order_status_history import OrderStatusHistory
+from app.models.order_tracking import OrderTracking
+from app.models.delivery import DeliveryPartner
+from app.models.delivery_history import DeliveryHistory
 from app.models.product import Product
 
 from app.schemas.order import (
@@ -20,6 +22,7 @@ from app.schemas.order import (
     CancelOrderResponse,
     ReorderResponse,
 )
+from app.schemas.order_tracking import DeliveryPartnerSummary, OrderTrackingItemResponse
 
 router = APIRouter(
     prefix="/orders",
@@ -32,15 +35,20 @@ router = APIRouter(
 # ======================================================
 
 @router.post(
+    "",
+    response_model=OrderResponse,
+    status_code=status.HTTP_201_CREATED
+)
+@router.post(
     "/",
-    response_model=OrderResponse
+    response_model=OrderResponse,
+    status_code=status.HTTP_201_CREATED
 )
 def place_order(
     order: OrderCreate,
     db: Session = Depends(get_db),
     customer: Customer = Depends(get_current_customer),
 ):
-
     cart_items = (
         db.query(CartItem)
         .filter(CartItem.customer_id == customer.id)
@@ -57,7 +65,6 @@ def place_order(
 
     # Validate stock
     for cart in cart_items:
-
         product = (
             db.query(Product)
             .filter(Product.id == cart.product_id)
@@ -73,7 +80,7 @@ def place_order(
         if product.stock < cart.quantity:
             raise HTTPException(
                 status_code=400,
-                detail=f"Insufficient stock for {product.product_name}"
+                detail=f"Insufficient stock for {product.product_name} (Only {product.stock} available)"
             )
 
         subtotal += float(product.price) * cart.quantity
@@ -87,17 +94,14 @@ def place_order(
     new_order = Order(
         order_number=order_number,
         customer_id=customer.id,
-
         total_amount=subtotal,
         delivery_charge=delivery_charge,
         gst=gst,
         grand_total=grand_total,
-
         payment_method=order.payment_method,
-
         payment_status="Pending",
         order_status="Pending",
-
+        estimated_delivery_time="Today within 2-3 hours",
         full_name=order.full_name,
         mobile_number=order.mobile_number,
         door_street=order.door_street,
@@ -111,7 +115,16 @@ def place_order(
     db.add(new_order)
     db.flush()
 
-    # Save initial tracking status
+    # Save initial tracking status into order_tracking
+    db.add(
+        OrderTracking(
+            order_id=new_order.id,
+            status="Order Placed",
+            updated_by="Customer"
+        )
+    )
+
+    # Legacy table sync
     db.add(
         OrderStatusHistory(
             order_id=new_order.id,
@@ -119,9 +132,8 @@ def place_order(
         )
     )
 
-    # Create order items
+    # Create order items and reduce stock
     for cart in cart_items:
-
         product = (
             db.query(Product)
             .filter(Product.id == cart.product_id)
@@ -137,9 +149,9 @@ def place_order(
         )
 
         db.add(order_item)
-
         product.stock -= cart.quantity
 
+    # Clear customer cart
     (
         db.query(CartItem)
         .filter(CartItem.customer_id == customer.id)
@@ -164,7 +176,6 @@ def get_orders(
     db: Session = Depends(get_db),
     customer: Customer = Depends(get_current_customer),
 ):
-
     orders = (
         db.query(Order)
         .filter(Order.customer_id == customer.id)
@@ -188,7 +199,6 @@ def get_order(
     db: Session = Depends(get_db),
     customer: Customer = Depends(get_current_customer),
 ):
-
     order = (
         db.query(Order)
         .filter(
@@ -205,6 +215,8 @@ def get_order(
         )
 
     return order
+
+
 # ======================================================
 # ORDER TRACKING
 # ======================================================
@@ -218,7 +230,6 @@ def track_order(
     db: Session = Depends(get_db),
     customer: Customer = Depends(get_current_customer),
 ):
-
     order = (
         db.query(Order)
         .filter(
@@ -234,19 +245,68 @@ def track_order(
             detail="Order not found."
         )
 
-    history = (
-        db.query(OrderStatusHistory)
-        .filter(
-            OrderStatusHistory.order_id == order.id
-        )
-        .order_by(OrderStatusHistory.updated_at.asc())
+    # Fetch from order_tracking table
+    tracking_rows = (
+        db.query(OrderTracking)
+        .filter(OrderTracking.order_id == order.id)
+        .order_by(OrderTracking.updated_at.asc())
         .all()
     )
 
+    # Fallback to OrderStatusHistory if order_tracking is empty
+    if not tracking_rows:
+        legacy_rows = (
+            db.query(OrderStatusHistory)
+            .filter(OrderStatusHistory.order_id == order.id)
+            .order_by(OrderStatusHistory.updated_at.asc())
+            .all()
+        )
+        history = [
+            OrderTrackingItemResponse(
+                id=h.id,
+                status=h.status,
+                updated_by="System",
+                updated_at=h.updated_at
+            )
+            for h in legacy_rows
+        ]
+    else:
+        history = [
+            OrderTrackingItemResponse(
+                id=h.id,
+                status=h.status,
+                updated_by=h.updated_by or "System",
+                updated_at=h.updated_at
+            )
+            for h in tracking_rows
+        ]
+
+    # Check delivery partner info
+    partner_summary = None
+    if order.delivery_partner_id:
+        partner = (
+            db.query(DeliveryPartner)
+            .filter(DeliveryPartner.id == order.delivery_partner_id)
+            .first()
+        )
+        if partner:
+            partner_summary = DeliveryPartnerSummary(
+                id=partner.id,
+                partner_id=partner.partner_id or f"DP{partner.id:03d}",
+                partner_name=partner.partner_name,
+                mobile_number=partner.mobile_number,
+                vehicle_number=partner.vehicle_number,
+                email=partner.email,
+            )
+
     return {
         "order_id": order.id,
+        "order_number": order.order_number,
         "current_status": order.order_status,
+        "estimated_delivery_time": order.estimated_delivery_time or "Today within 2-3 hours",
+        "delivery_partner": partner_summary,
         "history": history,
+        "created_at": order.created_at,
     }
 
 
@@ -263,7 +323,6 @@ def cancel_order(
     db: Session = Depends(get_db),
     customer: Customer = Depends(get_current_customer),
 ):
-
     order = (
         db.query(Order)
         .filter(
@@ -279,20 +338,37 @@ def cancel_order(
             detail="Order not found."
         )
 
-    if order.order_status != "Pending":
+    if order.order_status not in ["Pending", "Order Placed", "Confirmed"]:
         raise HTTPException(
             status_code=400,
-            detail="Only pending orders can be cancelled."
+            detail=f"Order cannot be cancelled in '{order.order_status}' status. Please contact support."
         )
 
     order.order_status = "Cancelled"
 
+    # Log to order_tracking
+    db.add(
+        OrderTracking(
+            order_id=order.id,
+            status="Cancelled",
+            updated_by=f"Customer ({customer.full_name})"
+        )
+    )
+
+    # Legacy table sync
     db.add(
         OrderStatusHistory(
             order_id=order.id,
             status="Cancelled"
         )
     )
+
+    # Restock products
+    items = db.query(OrderItem).filter(OrderItem.order_id == order.id).all()
+    for item in items:
+        prod = db.query(Product).filter(Product.id == item.product_id).first()
+        if prod:
+            prod.stock += item.quantity
 
     db.commit()
     db.refresh(order)
@@ -316,7 +392,6 @@ def reorder_order(
     db: Session = Depends(get_db),
     customer: Customer = Depends(get_current_customer),
 ):
-
     order = (
         db.query(Order)
         .filter(
@@ -332,12 +407,6 @@ def reorder_order(
             detail="Order not found."
         )
 
-    if order.order_status != "Delivered":
-        raise HTTPException(
-            status_code=400,
-            detail="Only delivered orders can be reordered."
-        )
-
     order_items = (
         db.query(OrderItem)
         .filter(OrderItem.order_id == order.id)
@@ -350,18 +419,15 @@ def reorder_order(
             detail="No products found in this order."
         )
 
+    added_count = 0
     for item in order_items:
-
         product = (
             db.query(Product)
             .filter(Product.id == item.product_id)
             .first()
         )
 
-        if not product:
-            continue
-
-        if product.stock <= 0:
+        if not product or product.stock <= 0:
             continue
 
         cart_item = (
@@ -373,20 +439,28 @@ def reorder_order(
             .first()
         )
 
+        qty_to_add = min(item.quantity, product.stock)
         if cart_item:
-            cart_item.quantity += item.quantity
+            cart_item.quantity += qty_to_add
         else:
             db.add(
                 CartItem(
                     customer_id=customer.id,
                     product_id=product.id,
-                    quantity=item.quantity,
+                    quantity=qty_to_add,
                 )
             )
+        added_count += 1
+
+    if added_count == 0:
+        raise HTTPException(
+            status_code=400,
+            detail="All products from this order are currently out of stock."
+        )
 
     db.commit()
 
     return {
-        "message": "Products added to cart successfully.",
+        "message": f"{added_count} product(s) added to cart successfully.",
         "new_order_id": None,
     }
